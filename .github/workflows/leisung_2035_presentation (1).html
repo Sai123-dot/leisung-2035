@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Leisung Technologies — 2035 Vision</title>
+  <meta name="description" content="Leisung Technologies 2035 Vision: Global expansion, immersive innovation, team growth, and IPO roadmap." />
+  <style>
+    :root{
+      --bg1:#667eea;
+      --bg2:#764ba2;
+      --card-bg:#ffffff;
+      --ink:#1f2937;
+      --muted:#6b7280;
+      --glass:rgba(255,255,255,.9);
+      --ring:rgba(102,126,234,.35);
+      --shadow:0 20px 40px rgba(0,0,0,.12);
+      --radius:20px;
+      --brand:#667eea;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+      color:var(--ink);
+      background:linear-gradient(135deg,var(--bg1),var(--bg2));
+      background-attachment:fixed;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    .container{
+      max-width:1200px;
+      margin-inline:auto;
+      padding:24px;
+    }
+
+    .slide{
+      background:var(--glass);
+      border-radius:var(--radius);
+      padding:40px 32px;
+      margin:28px 0;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,.4);
+      transition:transform .3s ease, box-shadow .3s ease;
+      will-change:transform;
+    }
+    .slide:focus-within,
+    .slide:hover{ transform:translateY(-4px); box-shadow:0 30px 60px rgba(0,0,0,.16) }
+
+    .hero{
+      color:#fff;
+      background:linear-gradient(45deg,var(--bg1),var(--bg2));
+      position:relative;
+      overflow:hidden;
+      text-align:center;
+      padding:72px 24px;
+    }
+    .hero::before{
+      content:"";
+      position:absolute; inset:-50%;
+      background:radial-gradient(ellipse at center, rgba(255,255,255,.12), transparent 60%);
+      animation:spin 24s linear infinite;
+    }
+    @keyframes spin{ to{ transform:rotate(360deg) } }
+
+    .hero h1{ font-size:clamp(28px,4vw,48px); margin:0 0 8px; letter-spacing:.5px }
+    .hero p{ margin:0 0 20px; opacity:.95 }
+    .badge{
+      display:inline-block; padding:10px 20px; border-radius:999px;
+      background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.35);
+      font-weight:700; letter-spacing:.5px
+    }
+
+    h2.section{ 
+      font-size:clamp(22px,2.4vw,32px);
+      text-align:center; color:var(--brand); margin:0 0 18px; position:relative
+    }
+    h2.section::after{ content:""; display:block; width:96px; height:4px; border-radius:4px;
+      margin:10px auto 0; background:linear-gradient(45deg,var(--bg1),var(--bg2)) }
+
+    .grid{ display:grid; gap:20px; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)) }
+    .card{
+      background:linear-gradient(145deg,#f8f9ff,#e8ecff);
+      border-left:5px solid var(--brand);
+      border-radius:14px; padding:22px; position:relative; overflow:hidden
+    }
+    .card h3{ margin:0 0 8px; color:var(--brand); font-size:18px }
+    .card p{ margin:0; color:#374151; line-height:1.55 }
+
+    .stats{ display:grid; gap:18px; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); margin-top:10px }
+    .stat{
+      background:linear-gradient(145deg,var(--bg1),var(--bg2));
+      color:#fff; border-radius:14px; padding:24px; text-align:center; position:relative; overflow:hidden
+    }
+    .stat .num{ font-size:clamp(28px,3.2vw,40px); font-weight:800; margin-bottom:6px }
+    .stat .lbl{ opacity:.95 }
+
+    .map{ background:linear-gradient(145deg,#f0f2ff,#e0e7ff); border-radius:14px; padding:24px }
+    .chips{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-top:12px }
+    .chip{ background:linear-gradient(45deg,var(--bg1),var(--bg2)); color:#fff; padding:12px 14px; border-radius:12px; text-align:center; font-weight:600 }
+
+    /* Timeline */
+    .timeline{ position:relative; padding-block:10px }
+    .timeline::before{
+      content:""; position:absolute; left:50%; transform:translateX(-50%); top:0; bottom:0;
+      width:4px; background:linear-gradient(180deg,var(--bg1),var(--bg2)); border-radius:4px
+    }
+    .t-item{ display:flex; align-items:center; margin:24px 0; position:relative }
+    .t-item:nth-child(odd){ flex-direction:row-reverse }
+    .t-dot{
+      position:absolute; left:50%; transform:translateX(-50%); width:18px; height:18px;
+      background:linear-gradient(45deg,var(--bg1),var(--bg2)); border:4px solid #fff; border-radius:50%; z-index:2
+    }
+    .t-card{
+      flex:1; background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:18px 20px;
+      margin:0 28px; box-shadow:0 10px 24px rgba(0,0,0,.08)
+    }
+    .t-card h3{ margin:0 0 6px; font-size:18px }
+    .t-card p{ margin:0; color:#4b5563 }
+
+    /* Motion on reveal */
+    .reveal{ opacity:0; transform:translateY(22px); transition:all .6s ease }
+    .reveal.is-visible{ opacity:1; transform:none }
+
+    /* Accessibility helpers */
+    a:focus, button:focus, .slide:focus{ outline:2px solid var(--ring); outline-offset:2px }
+
+    @media (max-width:768px){
+      .timeline::before{ left:24px; transform:none }
+      .t-item{ flex-direction:column !important; align-items:flex-start; padding-left:52px }
+      .t-dot{ left:24px; transform:none }
+      .t-card{ margin:10px 0 }
+    }
+  </style>
+</head>
+<body>
+  <main class="container" aria-label="Leisung 2035 Vision Presentation">
+    <!-- HERO -->
+    <section class="slide hero" aria-labelledby="hero-title">
+      <div class="hero-content">
+        <h1 id="hero-title">LEISUNG TECHNOLOGIES</h1>
+        <p class="subtitle" aria-live="polite">Leading the Future of Immersive Experiences</p>
+        <div class="badge" aria-label="Vision Year">2035 VISION</div>
+      </div>
+    </section>
+
+    <!-- COMPANY EVOLUTION -->
+    <section class="slide reveal" aria-labelledby="evolution">
+      <h2 id="evolution" class="section">Our Transformation Journey</h2>
+      <div class="stats" role="list">
+        <div class="stat" role="listitem" aria-label="Annual Revenue">
+          <div class="num">$100M</div><div class="lbl">Annual Revenue</div>
+        </div>
+        <div class="stat" role="listitem" aria-label="Team Members">
+          <div class="num">200+</div><div class="lbl">Team Members</div>
+        </div>
+        <div class="stat" role="listitem" aria-label="GCC Retail Market Share">
+          <div class="num">50%</div><div class="lbl">GCC Retail Market Share</div>
+        </div>
+        <div class="stat" role="listitem" aria-label="Best AV Integrator GCC">
+          <div class="num">#1</div><div class="lbl">Best AV Integrator GCC</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TEAM DYNAMICS (merged and corrected) -->
+    <section class="slide reveal" aria-labelledby="team">
+      <h2 id="team" class="section">200+ Professional Team Excellence</h2>
+      <div class="grid">
+        <article class="card" aria-label="Strategic Team Growth">
+          <h3>👥 Strategic Team Growth</h3>
+          <p><strong>2025:</strong> 75 employees (specialized expansion)<br>
+             <strong>2027:</strong> 120 employees (GCC market dominance)<br>
+             <strong>2030:</strong> 180 employees (Europe expansion)<br>
+             <strong>2035:</strong> 200+ employees (market leadership)
+          </p>
+        </article>
+        <article class="card" aria-label="Market Leadership Team">
+          <h3>🏆 Market Leadership Team</h3>
+          <p>Best AV integrator talent in GCC region, Microsoft &amp; Meta certified specialists, 50% GCC retail market share achievement team, award-winning project managers and technical leads.</p>
+        </article>
+        <article class="card" aria-label="Training & Development">
+          <h3>🎓 Training &amp; Development</h3>
+          <p>In-house AR/VR training academy, Microsoft &amp; Meta partnership training programs, industry certification leadership, continuous professional development culture.</p>
+        </article>
+        <article class="card" aria-label="GCC & Europe Integration">
+          <h3>🌍 GCC &amp; Europe Integration</h3>
+          <p>Teams across all 6 GCC countries, European expansion specialists, cultural integration across markets, seamless project delivery capabilities.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- STRATEGIC FOUNDATION -->
+    <section class="slide reveal" aria-labelledby="ecosystem">
+      <h2 id="ecosystem" class="section">Experience Hub Ecosystem Strategy</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>🌟 Hub-and-Spoke Model</h3>
+          <p>Dubai HQ as innovation core, with satellite “Experience Labs” in high-traffic zones: Riyadh, Doha, Kuwait City, Manama, and London for sector-specific demos.</p>
+        </div>
+        <div class="card">
+          <h3>🚀 MENA AR/VR Leadership</h3>
+          <p>Focus on recurring contracts and government-backed programs; standardize offerings for rapid rollouts with measurable outcomes.</p>
+        </div>
+        <div class="card">
+          <h3>🎯 Immersive Platform</h3>
+          <p>Subscription-based platform for analytics, remote content control, and hologram/projection bundles with 20–30% recurring margins.</p>
+        </div>
+        <div class="card">
+          <h3>💎 Smart City Integration</h3>
+          <p>Energy-efficient transparent displays and AI-enhanced interactive systems for public sector deployments.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FUTURE WORKSPACE -->
+    <section class="slide reveal" aria-labelledby="workspace">
+      <h2 id="workspace" class="section">Future Workspace 2035</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>🏢 Holographic Headquarters</h3>
+          <p>360° briefing rooms, AR workstations, and AI-assisted PM systems integrated throughout.</p>
+        </div>
+        <div class="card">
+          <h3>🌐 Virtual Collaboration</h3>
+          <p>Distributed teams collaborate in shared 3D spaces with spatial computing.</p>
+        </div>
+        <div class="card">
+          <h3>🤖 AI-Powered Labs</h3>
+          <p>Dedicated R&amp;D in Dubai, Riyadh, and London to prototype next‑gen experiences.</p>
+        </div>
+        <div class="card">
+          <h3>🎯 Mixed Reality Training</h3>
+          <p>Simulation-based training for faster onboarding and safer deployments.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- RECOGNITION -->
+    <section class="slide reveal" aria-labelledby="awards">
+      <h2 id="awards" class="section">Industry Recognition &amp; Awards 2035</h2>
+      <div class="grid">
+        <div class="card"><h3>🏆 Best AV Integrator GCC</h3><p>Regional leadership across GCC markets.</p></div>
+        <div class="card"><h3>👑 AR/VR Innovation Leader</h3><p>Breakthrough immersive experiences.</p></div>
+        <div class="card"><h3>🎯 Retail Excellence Award</h3><p>50% GCC retail market share recognition.</p></div>
+        <div class="card"><h3>🌟 Smart City Pioneer</h3><p>Holographic city solutions for public sector.</p></div>
+        <div class="card"><h3>🏅 Training Excellence</h3><p>Leading AR/VR professional development.</p></div>
+        <div class="card"><h3>🚀 Partnership Excellence</h3><p>Microsoft &amp; Meta strategic partner.</p></div>
+      </div>
+    </section>
+
+    <!-- EXPANSION MAP -->
+    <section class="slide reveal" aria-labelledby="map">
+      <h2 id="map" class="section">GCC &amp; Europe Market Leadership 2035</h2>
+      <div class="map" role="region" aria-label="Key Locations">
+        <p style="text-align:center; color:var(--brand); font-weight:700; margin:0 0 12px">Dominating GCC Markets &amp; Expanding into Europe</p>
+        <div class="chips">
+          <div class="chip" aria-label="Dubai HQ">🇦🇪 Dubai HQ</div>
+          <div class="chip">🇸🇦 Riyadh</div>
+          <div class="chip">🇶🇦 Doha</div>
+          <div class="chip">🇰🇼 Kuwait City</div>
+          <div class="chip">🇧🇭 Manama</div>
+          <div class="chip">🇴🇲 Muscat</div>
+          <div class="chip">🇬🇧 London</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINANCIAL & IPO ROADMAP -->
+    <section class="slide reveal" aria-labelledby="finance">
+      <h2 id="finance" class="section">Financial Excellence &amp; IPO Roadmap</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>📈 Revenue Milestones</h3>
+          <p><strong>2025:</strong> $12M (GCC expansion)<br>
+             <strong>2027:</strong> $35M (market leadership)<br>
+             <strong>2030:</strong> $65M (Europe entry)<br>
+             <strong>2035:</strong> $100M (regional dominance)</p>
+        </div>
+        <div class="card">
+          <h3>🎯 Market Leadership</h3>
+          <p><strong>GCC Retail:</strong> 50% share<br>
+             <strong>AV Integration:</strong> #1 GCC provider<br>
+             <strong>Training:</strong> Regional AR/VR leader<br>
+             <strong>Partnerships:</strong> Microsoft &amp; Meta</p>
+        </div>
+        <div class="card">
+          <h3>🏛 IPO Timeline</h3>
+          <p><strong>2030–2032:</strong> Governance &amp; audit readiness, recurring revenue &gt;50%<br>
+             <strong>2032:</strong> Target IPO (DFM or regional exchange)<br>
+             <strong>2033–2035:</strong> Post‑IPO scale &amp; global expansion</p>
+        </div>
+        <div class="card">
+          <h3>💼 Strategic Positioning</h3>
+          <p><strong>Recurring Revenue:</strong> 60% target<br>
+             <strong>Margins:</strong> ~28% blended<br>
+             <strong>Focus:</strong> GCC dominance + Europe entry<br>
+             <strong>Moat:</strong> Exclusive tech &amp; talent</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TIMELINE -->
+    <section class="slide reveal" aria-labelledby="roadmap">
+      <h2 id="roadmap" class="section">Strategic Implementation Roadmap</h2>
+      <div class="timeline" role="list">
+        <div class="t-item" role="listitem">
+          <div class="t-dot" aria-hidden="true"></div>
+          <div class="t-card">
+            <h3>Q4 2025 – Q1 2026: Foundation</h3>
+            <p>Launch Experience Labs in KSA; hire 30 AR/VR specialists; 20 pilot programs.</p>
+          </div>
+        </div>
+        <div class="t-item" role="listitem">
+          <div class="t-dot" aria-hidden="true"></div>
+          <div class="t-card">
+            <h3>2026 – 2027: Ecosystem Expansion</h3>
+            <p>Enter Qatar; JV on transparent displays; roll out Immersive Platform.</p>
+          </div>
+        </div>
+        <div class="t-item" role="listitem">
+          <div class="t-dot" aria-hidden="true"></div>
+          <div class="t-card">
+            <h3>2028 – 2030: Regional Dominance</h3>
+            <p>Full GCC coverage; first international pilot; Series B funding.</p>
+          </div>
+        </div>
+        <div class="t-item" role="listitem">
+          <div class="t-dot" aria-hidden="true"></div>
+          <div class="t-card">
+            <h3>2030 – 2032: IPO Preparation</h3>
+            <p>Pre‑IPO financing; governance &amp; audits; proprietary platform launch.</p>
+          </div>
+        </div>
+        <div class="t-item" role="listitem">
+          <div class="t-dot" aria-hidden="true"></div>
+          <div class="t-card">
+            <h3>2032 – 2035: Public Company Excellence</h3>
+            <p>IPO execution; global expansion; post‑IPO innovation investments.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="slide hero" aria-labelledby="cta">
+      <div class="hero-content">
+        <h2 id="cta" class="section" style="color:#fff">THE FUTURE IS NOW</h2>
+        <p class="subtitle">From Dubai AV Integrator to Global AR/VR Pioneer</p>
+        <p style="font-size:1.05rem; opacity:.95">Ready to transform Leisung Technologies into the world's leading immersive experience company.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Intersection Observer to reveal slides smoothly
+    const io = new IntersectionObserver((entries)=>{
+      for(const e of entries){
+        if(e.isIntersecting){ e.target.classList.add('is-visible'); io.unobserve(e.target); }
+      }
+    }, {threshold:.12});
+    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+    // Minor click affordance on cards
+    document.querySelectorAll('.card').forEach(c=>{
+      c.addEventListener('click',()=>{
+        c.style.transform='scale(1.02)';
+        setTimeout(()=>{ c.style.transform=''; },180);
+      });
+    });
+  </script>
+</body>
+</html>
