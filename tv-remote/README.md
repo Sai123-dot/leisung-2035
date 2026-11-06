@@ -57,20 +57,30 @@ instantly even when the server is briefly unreachable (it reconnects on its own)
 
 ### Running it on the Android phone itself (Termux)
 
+Install [Termux](https://termux.dev) (from F-Droid or GitHub, not the outdated Play Store build),
+open it and paste this one command. It downloads the project, installs Python and the remote:
+
 ```bash
-pkg install git
-git clone <this repository> && cd leisung-2035/tv-remote
-bash termux-install.sh                  # installs Python + the remote inside Termux
-hisense-remote pair                     # one-time: type the code the TV shows
-hisense-remote serve --bind 127.0.0.1   # start the server on the phone
+curl -sL https://raw.githubusercontent.com/Sai123-dot/leisung-2035/claude/hisense-tv-remote-control-4hv6r3/tv-remote/termux-install.sh | bash
+```
+
+Then:
+
+```bash
+hisense-remote pair               # one-time: type the code the TV shows
+~/.termux/boot/hisense-remote.sh  # start the remote on this phone
 ```
 
 Open `http://127.0.0.1:8765/` in Chrome and choose *Add to Home screen*. Tap *Acquire wakelock*
-in Termux's notification so Android does not stop it in the background; to start it on boot,
-install the Termux:Boot add-on and put the `serve` command in `~/.termux/boot/remote.sh`.
-Discovery via mDNS is often blocked on phones, so pair by IP address if *Find TVs* comes back empty.
-(The Termux path follows Termux's documented packaging; it has not been exercised in this repository's
-automated tests, so if a package fails to build, run `pkg install clang` and retry.)
+in Termux's notification so Android does not stop it in the background. With the Termux:Boot
+add-on installed, the same start script runs automatically after every reboot. To let other
+phones in the house use it too, start it with `hisense-remote serve --bind 0.0.0.0` instead.
+
+Discovery via mDNS is often blocked on phones, so if `pair` finds nothing, type the TV's IP
+address when asked (Settings › Network & Internet on the TV). The installer uses pure-Python
+builds of every package so nothing has to be compiled; if a package still fails to build, run
+`pkg install clang` and rerun the command. (This path follows Termux's documented packaging but is
+not covered by this repository's automated tests.)
 
 ## Quick start
 
