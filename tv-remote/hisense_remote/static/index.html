@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0e1116">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Hisense Remote</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <main class="remote">
+    <header class="topbar">
+      <div class="tvinfo">
+        <div class="tvname" id="tv-name">Hisense TV</div>
+        <div class="tvmeta">
+          <span class="dot" id="status-dot"></span>
+          <span id="status-text">Connecting…</span>
+          <span id="power-text"></span>
+        </div>
+      </div>
+      <button class="icon-btn" id="btn-settings" aria-label="TV connection settings" title="Settings">&#9881;</button>
+    </header>
+
+    <section class="nowplaying">
+      <div class="np-app"><span class="label">App</span><span id="current-app">—</span></div>
+      <div class="np-vol"><span class="label">Vol</span><div class="volbar"><div class="volfill" id="vol-fill"></div></div><span id="vol-text">—</span></div>
+    </section>
+
+    <div class="banner hidden" id="banner">
+      <span id="banner-text"></span>
+      <button class="banner-btn hidden" id="banner-action"></button>
+    </div>
+
+    <section class="row top-row">
+      <button class="key power" data-key="POWER" aria-label="Power" title="Power (hold for options)">&#x23FB;</button>
+      <button class="key" data-key="TV_INPUT" title="Input source">Input</button>
+      <button class="key" data-key="SETTINGS" title="TV settings">Settings</button>
+      <button class="key" data-key="ASSIST" aria-label="Google Assistant" title="Google Assistant">&#x1F399;</button>
+    </section>
+
+    <section class="dpad-area">
+      <div class="dpad">
+        <button class="key dir up" data-key="DPAD_UP" aria-label="Up">&#9650;</button>
+        <button class="key dir left" data-key="DPAD_LEFT" aria-label="Left">&#9664;</button>
+        <button class="key ok" data-key="DPAD_CENTER" aria-label="Select">OK</button>
+        <button class="key dir right" data-key="DPAD_RIGHT" aria-label="Right">&#9654;</button>
+        <button class="key dir down" data-key="DPAD_DOWN" aria-label="Down">&#9660;</button>
+      </div>
+    </section>
+
+    <section class="row nav-row">
+      <button class="key" data-key="BACK">&larr; Back</button>
+      <button class="key" data-key="HOME">&#8962; Home</button>
+      <button class="key" data-key="MENU">&#9776; Menu</button>
+    </section>
+
+    <section class="rockers">
+      <div class="rocker">
+        <button class="key" data-key="VOLUME_UP" aria-label="Volume up">+</button>
+        <span class="rocker-label">VOL</span>
+        <button class="key" data-key="VOLUME_DOWN" aria-label="Volume down">&minus;</button>
+      </div>
+      <div class="rocker-mid">
+        <button class="key" data-key="VOLUME_MUTE" id="btn-mute" aria-label="Mute">&#x1F507; Mute</button>
+        <button class="key" data-key="APP_SWITCH" title="Recent apps">Recents</button>
+      </div>
+      <div class="rocker">
+        <button class="key" data-key="CHANNEL_UP" aria-label="Channel up">+</button>
+        <span class="rocker-label">CH</span>
+        <button class="key" data-key="CHANNEL_DOWN" aria-label="Channel down">&minus;</button>
+      </div>
+    </section>
+
+    <section class="row media-row">
+      <button class="key" data-key="MEDIA_PREVIOUS" aria-label="Previous">&#9198;</button>
+      <button class="key" data-key="MEDIA_REWIND" aria-label="Rewind">&#9194;</button>
+      <button class="key accent" data-key="MEDIA_PLAY_PAUSE" aria-label="Play / pause">&#9199;</button>
+      <button class="key" data-key="MEDIA_FAST_FORWARD" aria-label="Fast forward">&#9193;</button>
+      <button class="key" data-key="MEDIA_NEXT" aria-label="Next">&#9197;</button>
+    </section>
+
+    <section class="apps" id="apps" aria-label="Launch an app"></section>
+
+    <section class="tabs" role="tablist">
+      <button class="tab active" data-panel="panel-numpad" role="tab">Numpad</button>
+      <button class="tab" data-panel="panel-text" role="tab">Keyboard</button>
+      <button class="tab" data-panel="panel-more" role="tab">More</button>
+    </section>
+
+    <section class="panel numpad" id="panel-numpad">
+      <button class="key" data-key="1">1</button>
+      <button class="key" data-key="2">2</button>
+      <button class="key" data-key="3">3</button>
+      <button class="key" data-key="4">4</button>
+      <button class="key" data-key="5">5</button>
+      <button class="key" data-key="6">6</button>
+      <button class="key" data-key="7">7</button>
+      <button class="key" data-key="8">8</button>
+      <button class="key" data-key="9">9</button>
+      <button class="key" data-key="INFO">Info</button>
+      <button class="key" data-key="0">0</button>
+      <button class="key" data-key="GUIDE">Guide</button>
+    </section>
+
+    <section class="panel hidden" id="panel-text">
+      <form id="text-form" autocomplete="off">
+        <input id="text-input" type="text" placeholder="Type here, it goes to the field selected on the TV" enterkeyhint="send">
+        <button type="submit" class="key accent">Send</button>
+      </form>
+      <div class="row small four">
+        <button class="key" data-key="DEL" aria-label="Backspace">&#9003;</button>
+        <button class="key" data-key="SPACE">Space</button>
+        <button class="key" data-key="ENTER">Enter &#8629;</button>
+        <button class="key" data-key="SEARCH" aria-label="Search">&#x1F50D;</button>
+      </div>
+      <p class="hint">On a computer: arrow keys, Enter, Backspace/Esc (back), H (home), M (menu), I (info), + / &minus; (volume), 0&ndash;9, Space (play/pause).</p>
+    </section>
+
+    <section class="panel hidden" id="panel-more">
+      <div class="grid4">
+        <button class="key" data-key="TV_INPUT_HDMI_1">HDMI 1</button>
+        <button class="key" data-key="TV_INPUT_HDMI_2">HDMI 2</button>
+        <button class="key" data-key="TV_INPUT_HDMI_3">HDMI 3</button>
+        <button class="key" data-key="TV_INPUT_HDMI_4">HDMI 4</button>
+      </div>
+      <div class="grid3">
+        <button class="key" data-key="TV">Live TV</button>
+        <button class="key" data-key="LAST_CHANNEL">Last ch.</button>
+        <button class="key" data-key="CAPTIONS">Subtitles</button>
+        <button class="key" data-key="MEDIA_AUDIO_TRACK">Audio</button>
+        <button class="key" data-key="MEDIA_STOP">Stop</button>
+        <button class="key" data-key="BOOKMARK">Bookmark</button>
+        <button class="key" data-key="WAKEUP">Wake</button>
+        <button class="key" data-key="SLEEP">Sleep</button>
+        <button class="key" data-key="MEDIA_RECORD">Record</button>
+      </div>
+      <div class="grid4 colours">
+        <button class="key red" data-key="PROG_RED" aria-label="Red"></button>
+        <button class="key green" data-key="PROG_GREEN" aria-label="Green"></button>
+        <button class="key yellow" data-key="PROG_YELLOW" aria-label="Yellow"></button>
+        <button class="key blue" data-key="PROG_BLUE" aria-label="Blue"></button>
+      </div>
+    </section>
+
+    <footer class="footer">Hisense Remote &middot; <span id="conn-mode">connecting</span></footer>
+  </main>
+
+  <div class="scrim hidden" id="scrim"></div>
+  <aside class="drawer hidden" id="drawer" aria-label="TV connection">
+    <div class="drawer-head">
+      <h2>TV connection</h2>
+      <button class="icon-btn" id="btn-close-drawer" aria-label="Close">&#10005;</button>
+    </div>
+
+    <label class="field">
+      <span>TV address</span>
+      <input id="host-input" type="text" placeholder="e.g. 192.168.1.23" inputmode="decimal" autocomplete="off" spellcheck="false">
+    </label>
+    <div class="drawer-actions">
+      <button class="key accent" id="btn-connect">Connect</button>
+      <button class="key" id="btn-pair">Pair</button>
+      <button class="key" id="btn-discover">Find TVs</button>
+    </div>
+    <ul class="found" id="found-list"></ul>
+
+    <div class="pair-box hidden" id="pair-box">
+      <p>Enter the 6-character code shown on the TV screen:</p>
+      <form id="pair-form" autocomplete="off">
+        <input id="pair-code" type="text" maxlength="6" placeholder="A1B2C3" autocapitalize="characters" autocomplete="one-time-code" spellcheck="false">
+        <button class="key accent" type="submit">Finish pairing</button>
+      </form>
+    </div>
+
+    <div class="drawer-actions">
+      <button class="key" id="btn-wake" title="Needs the TV's network standby / wake-on-LAN setting">Wake on LAN</button>
+    </div>
+
+    <h3>Access token</h3>
+    <label class="field">
+      <input id="token-input" type="password" placeholder="Paste the --token value, if any" autocomplete="off">
+    </label>
+    <div class="drawer-actions">
+      <button class="key" id="btn-save-token">Save token</button>
+    </div>
+
+    <h3>Device</h3>
+    <pre class="device" id="device-info"></pre>
+    <p class="hint">The TV must be on the same network, with the "Android TV Remote Service" app enabled (it is by default).</p>
+  </aside>
+
+  <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

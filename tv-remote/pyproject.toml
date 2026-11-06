@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hisense-remote"
+version = "0.1.0"
+description = "Control a Hisense Android TV / Google TV over the local network: CLI plus a phone-friendly web remote."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "androidtvremote2>=0.3,<1",
+    "aiohttp>=3.9,<4",
+    "zeroconf>=0.130",
+]
+
+[project.scripts]
+hisense-remote = "hisense_remote.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hisense_remote*"]
+
+[tool.setuptools.package-data]
+hisense_remote = ["static/*"]
