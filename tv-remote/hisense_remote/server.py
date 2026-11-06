@@ -7,12 +7,13 @@ import json
 import logging
 import secrets
 import socket
+import urllib.parse
 from pathlib import Path
 from typing import Any
 
 from aiohttp import WSMsgType, web
 
-from . import discovery
+from . import __version__, discovery
 from .apps import COMMON_APPS
 from .keys import UnknownKey, all_keycodes, list_aliases
 from .tv import NeedsPairing, NotConnected, PairingFailed, TVController, TVError, TVUnreachable
@@ -24,6 +25,7 @@ TV_KEY: web.AppKey[TVController] = web.AppKey("tv", object)  # type: ignore[type
 TOKEN_KEY: web.AppKey[str | None] = web.AppKey("token", object)  # type: ignore[type-var]
 SOCKETS_KEY: web.AppKey[set[web.WebSocketResponse]] = web.AppKey("sockets", set)
 LISTENER_KEY: web.AppKey[Any] = web.AppKey("listener", object)
+INFO_KEY: web.AppKey[dict[str, Any]] = web.AppKey("info", dict)
 
 ERROR_CODES: list[tuple[type[Exception], int, str]] = [
     (UnknownKey, 400, "unknown_key"),
@@ -99,6 +101,35 @@ def _require(data: dict[str, Any], field: str) -> str:
 
 async def index(request: web.Request) -> web.StreamResponse:
     return web.FileResponse(STATIC_DIR / "index.html")
+
+
+async def manifest(request: web.Request) -> web.StreamResponse:
+    return web.FileResponse(STATIC_DIR / "manifest.webmanifest", headers={"Content-Type": "application/manifest+json"})
+
+
+async def service_worker(request: web.Request) -> web.StreamResponse:
+    # Served from the root so it can control the whole app.
+    return web.FileResponse(
+        STATIC_DIR / "sw.js", headers={"Content-Type": "application/javascript", "Cache-Control": "no-cache"}
+    )
+
+
+async def get_info(request: web.Request) -> web.Response:
+    return _ok(**request.app[INFO_KEY])
+
+
+async def get_qr(request: web.Request) -> web.Response:
+    """SVG QR code of the address phones should open (includes the token when one is set)."""
+    url = request.app[INFO_KEY].get("phone_url")
+    if not url:
+        return _error(404, "no_url", "No network address known for this server")
+    try:
+        import qrcode
+        import qrcode.image.svg as qrsvg
+    except ImportError:
+        return _error(501, "qrcode_missing", "Install the 'qrcode' package to get a QR code")
+    image = qrcode.make(url, image_factory=qrsvg.SvgPathImage, border=1)
+    return web.Response(body=image.to_string(), content_type="image/svg+xml", headers={"Cache-Control": "no-cache"})
 
 
 async def get_state(request: web.Request) -> web.Response:
@@ -268,14 +299,36 @@ async def _on_shutdown(app: web.Application) -> None:
     await tv.disconnect()
 
 
-def create_app(tv: TVController, *, token: str | None = None) -> web.Application:
-    """Build the aiohttp application around ``tv``."""
+def phone_url(urls: list[str], token: str | None) -> str | None:
+    """The address to show on a phone: the LAN URL, with the token embedded when one is required."""
+    url = next((u for u in urls if "localhost" not in u and "127.0.0.1" not in u), urls[0] if urls else None)
+    if url and token:
+        url += ("&" if "?" in url else "?") + "token=" + urllib.parse.quote(token, safe="")
+    return url
+
+
+def create_app(tv: TVController, *, token: str | None = None, urls: list[str] | None = None) -> web.Application:
+    """Build the aiohttp application around ``tv``.
+
+    :param urls: the addresses this server is reachable on, used for the "open on your phone" QR code.
+    """
     app = web.Application(middlewares=[auth_middleware, error_middleware])
     app[TV_KEY] = tv
     app[TOKEN_KEY] = token or None
     app[SOCKETS_KEY] = set()
+    urls = list(urls or [])
+    app[INFO_KEY] = {
+        "version": __version__,
+        "urls": urls,
+        "phone_url": phone_url(urls, token or None),
+        "token_required": bool(token),
+    }
 
     app.router.add_get("/", index)
+    app.router.add_get("/manifest.webmanifest", manifest)
+    app.router.add_get("/sw.js", service_worker)
+    app.router.add_get("/api/info", get_info)
+    app.router.add_get("/api/qr.svg", get_qr)
     app.router.add_get("/api/state", get_state)
     app.router.add_post("/api/key", post_key)
     app.router.add_post("/api/text", post_text)
@@ -322,7 +375,11 @@ def run(
     autoconnect: bool = True,
 ) -> None:
     """Serve the remote UI until interrupted."""
-    app = create_app(tv, token=token)
+    urls = [f"http://{bind}:{port}/"] if bind not in ("0.0.0.0", "::", "") else [f"http://localhost:{port}/"]
+    ip = lan_ip() if bind in ("0.0.0.0", "::", "") else None
+    if ip:
+        urls.append(f"http://{ip}:{port}/")
+    app = create_app(tv, token=token, urls=urls)
 
     async def startup(_app: web.Application) -> None:
         if autoconnect and tv.host:
@@ -330,15 +387,30 @@ def run(
 
     app.on_startup.append(startup)
 
-    urls = [f"http://{bind}:{port}/"] if bind not in ("0.0.0.0", "::", "") else [f"http://localhost:{port}/"]
-    ip = lan_ip() if bind in ("0.0.0.0", "::", "") else None
-    if ip:
-        urls.append(f"http://{ip}:{port}/")
     print("Hisense remote is running. Open one of these on a phone or computer on the same network:")
     for url in urls:
         print(f"  {url}")
     if token:
-        print("  (an access token is required; enter it in the settings panel)")
+        print("  (an access token is required; the QR code below already includes it)")
     print(f"TV: {tv.host or 'not configured yet - use the settings panel to discover and pair'}")
+    scan_url = app[INFO_KEY]["phone_url"]
+    if ip and scan_url:
+        print("\nScan this with your phone's camera to open the remote, then 'Add to Home Screen':")
+        _print_qr(scan_url)
     print("Press Ctrl+C to stop.")
     web.run_app(app, host=bind, port=port, print=None, access_log=None)
+
+
+def _print_qr(url: str) -> None:
+    try:
+        import qrcode
+    except ImportError:
+        print(f"  (install the 'qrcode' package to get a QR code here)  {url}")
+        return
+    qr = qrcode.QRCode(border=1)
+    qr.add_data(url)
+    qr.make(fit=True)
+    try:
+        qr.print_ascii(invert=True)
+    except UnicodeEncodeError:  # terminals without UTF-8 support
+        print(f"  {url}")

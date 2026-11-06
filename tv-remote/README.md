@@ -36,6 +36,42 @@ pip install -e .                   # installs the `hisense-remote` command
 
 (Or without installing: `pip install -r requirements.txt` and use `python -m hisense_remote ...`.)
 
+## Use it from your phone
+
+The remote is a web app, so the phone only needs a browser. Something has to run the small
+server on the same network as the TV; pick whichever fits:
+
+| Where the server runs | Works with | How |
+|-----------------------|------------|-----|
+| A computer, Raspberry Pi, NAS or Docker host that stays on | Android and iPhone | `hisense-remote serve`, then scan the QR code it prints (or open the printed URL) on the phone |
+| **The Android phone itself** (no computer needed) | Android | Install [Termux](https://termux.dev) from F-Droid, then run `bash termux-install.sh` (see below) |
+| iPhone only, nothing else available | iPhone | iOS cannot run the server; a Raspberry Pi Zero or any always-on box next to the TV is the cheapest option |
+
+Once the page is open on the phone, make it an app:
+
+- **Android (Chrome)**: tap *Install as an app* in the settings panel (gear icon), or Chrome menu › *Add to Home screen*.
+- **iPhone / iPad (Safari)**: Share button › *Add to Home Screen*.
+
+It then opens full screen with its own icon, remembers the TV and the access token, and starts
+instantly even when the server is briefly unreachable (it reconnects on its own).
+
+### Running it on the Android phone itself (Termux)
+
+```bash
+pkg install git
+git clone <this repository> && cd leisung-2035/tv-remote
+bash termux-install.sh                  # installs Python + the remote inside Termux
+hisense-remote pair                     # one-time: type the code the TV shows
+hisense-remote serve --bind 127.0.0.1   # start the server on the phone
+```
+
+Open `http://127.0.0.1:8765/` in Chrome and choose *Add to Home screen*. Tap *Acquire wakelock*
+in Termux's notification so Android does not stop it in the background; to start it on boot,
+install the Termux:Boot add-on and put the `serve` command in `~/.termux/boot/remote.sh`.
+Discovery via mDNS is often blocked on phones, so pair by IP address if *Find TVs* comes back empty.
+(The Termux path follows Termux's documented packaging; it has not been exercised in this repository's
+automated tests, so if a package fails to build, run `pkg install clang` and retry.)
+
 ## Quick start
 
 ```bash
@@ -44,8 +80,8 @@ hisense-remote pair                # pick the TV, type the code the TV shows -> 
 hisense-remote serve               # web remote on http://<this computer>:8765/
 ```
 
-Open the printed URL on your phone (same Wi-Fi). Tap the share icon and "Add to Home Screen"
-for an app-like icon. Pairing is a one-time step; the client certificate is stored in
+`serve` prints the address and a QR code; scan it with the phone's camera (same Wi-Fi) and the
+remote opens. Pairing is a one-time step; the client certificate is stored in
 `~/.config/hisense-remote/` (override with `--config-dir` or `HISENSE_REMOTE_HOME`).
 
 You can also do everything from the browser: `serve` with no TV configured shows a *Set up*
@@ -85,8 +121,9 @@ hisense-remote --no-ime serve                          # if the TV keeps showing
 ```
 
 Anyone who can reach the server can control the TV, exactly like anyone holding the remote.
-On a shared network start it with `--token` and enter the token once in the settings panel
-(gear icon); it is kept in the browser's local storage.
+On a shared network start it with `--token`. The QR code printed by `serve` (and shown in the
+settings panel) already contains the token, so a scanned phone is authorised straight away;
+otherwise enter it once in the settings panel (gear icon). It is kept in the browser's local storage.
 
 ## HTTP / WebSocket API
 
@@ -106,6 +143,8 @@ With `--token`, send `X-Auth-Token: <token>` or `?token=<token>`.
 | GET    | `/api/discover`     | `?timeout=4`                                   | mDNS scan |
 | GET    | `/api/apps`         |                                                | known apps |
 | GET    | `/api/keys`         |                                                | key codes and aliases |
+| GET    | `/api/info`         |                                                | server version, addresses, whether a token is required |
+| GET    | `/api/qr.svg`       |                                                | QR code of the address phones should open |
 | WS     | `/ws`               | send `{"type":"key","key":"ok","direction":"SHORT","id":1}`, `{"type":"text",...}`, `{"type":"app",...}` | pushes `{"type":"state",...}` on every change |
 
 Error codes: `unknown_key`, `bad_request` (400), `needs_pairing` (409), `unreachable` (502),
@@ -161,6 +200,8 @@ docker run -it --rm --network host -v hisense-remote:/data hisense-remote pair
   current app will then not be reported.
 - **Works from the computer but not from the phone** – a firewall is blocking port 8765, or the
   phone is on a different Wi-Fi (guest network / AP isolation).
+- **The home-screen app shows an old version** – it caches the page for instant start; pull to
+  refresh or reopen it once while the server is reachable and it updates itself.
 
 ## Development
 
@@ -172,4 +213,5 @@ python -m hisense_remote serve --demo       # exercise the UI without a TV
 
 The code lives in `hisense_remote/`: `tv.py` (connection, pairing, commands, Wake-on-LAN),
 `server.py` (aiohttp API + WebSocket), `cli.py`, `discovery.py` (zeroconf), `keys.py` (key aliases),
-`apps.py` (package ids), `fake.py` (simulated TV) and `static/` (the web UI).
+`apps.py` (package ids), `fake.py` (simulated TV) and `static/` (the web UI, including the PWA
+manifest, service worker and icons).

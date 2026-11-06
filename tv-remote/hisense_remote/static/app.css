@@ -189,6 +189,8 @@ input:focus { outline: 2px solid var(--accent); border-color: transparent; }
 .pair-box { background: var(--bg); border-radius: 12px; padding: 12px; }
 .pair-box p { margin: 0 0 8px; font-size: .9rem; }
 .device { margin: 0; font-size: .8rem; color: var(--muted); white-space: pre-wrap; }
+.phone-box { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.qr { width: 180px; height: 180px; background: #fff; padding: 8px; border-radius: 10px; }
 
 /* toast */
 .toast {

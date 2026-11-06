@@ -21,8 +21,20 @@
     0: '0', 1: '1', 2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9',
   };
 
-  const app = { token: '', ws: null, wsOpen: false, state: null, apps: [], seq: 0, pollTimer: null, reconnectTimer: null, toastTimer: null };
+  const app = { token: '', ws: null, wsOpen: false, state: null, apps: [], seq: 0, pollTimer: null, reconnectTimer: null, toastTimer: null, installPrompt: null };
   try { app.token = localStorage.getItem(TOKEN_STORAGE) || ''; } catch (e) { app.token = ''; }
+
+  // A token embedded in the URL (from the QR code) is saved once and removed from the address bar.
+  try {
+    const params = new URLSearchParams(location.search);
+    if (params.has('token')) {
+      app.token = params.get('token') || '';
+      try { localStorage.setItem(TOKEN_STORAGE, app.token); } catch (e) { /* ignore */ }
+      params.delete('token');
+      const rest = params.toString();
+      history.replaceState(null, '', location.pathname + (rest ? '?' + rest : '') + location.hash);
+    }
+  } catch (e) { /* ignore */ }
 
   // ---- HTTP -----------------------------------------------------------------
 
@@ -332,9 +344,62 @@
     } catch (err) { if (err.code === 'unauthorized') handleError(err); }
   }
 
+  // ---- phone / install helpers ---------------------------------------------------
+
+  function isStandalone() {
+    return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  }
+  function isIOS() {
+    return /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  async function loadInfo() {
+    try {
+      const d = await api('/api/info');
+      const img = $('#qr-img');
+      if (d.phone_url && !isStandalone()) {
+        img.src = '/api/qr.svg' + (app.token ? '?token=' + encodeURIComponent(app.token) : '');
+        img.classList.remove('hidden');
+        $('#phone-hint').classList.remove('hidden');
+      } else {
+        img.classList.add('hidden');
+        $('#phone-hint').classList.add('hidden');
+      }
+    } catch (e) { /* the QR code is optional */ }
+  }
+
+  function setupInstall() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => { /* offline shell is optional */ });
+    }
+    window.addEventListener('beforeinstallprompt', (ev) => {
+      ev.preventDefault();
+      app.installPrompt = ev;
+      $('#btn-install').classList.remove('hidden');
+      $('#android-hint').classList.add('hidden');
+    });
+    window.addEventListener('appinstalled', () => {
+      app.installPrompt = null;
+      $('#btn-install').classList.add('hidden');
+      toast('Installed. Open it from your home screen.');
+    });
+    $('#btn-install').addEventListener('click', async () => {
+      if (!app.installPrompt) return;
+      app.installPrompt.prompt();
+      try { await app.installPrompt.userChoice; } catch (e) { /* ignore */ }
+      app.installPrompt = null;
+      $('#btn-install').classList.add('hidden');
+    });
+    if (!isStandalone()) {
+      if (isIOS()) $('#ios-hint').classList.remove('hidden');
+      else if (/Android/.test(navigator.userAgent)) $('#android-hint').classList.remove('hidden');
+    }
+  }
+
   // ---- wiring ------------------------------------------------------------------
 
   function init() {
+    setupInstall();
     bindKeyButtons();
     document.addEventListener('keydown', onKeyboard);
 
@@ -368,6 +433,7 @@
       toast(app.token ? 'Token saved' : 'Token cleared');
       connectWS();
       loadApps();
+      loadInfo();
     });
 
     document.addEventListener('visibilitychange', () => {
@@ -375,6 +441,7 @@
     });
 
     loadApps();
+    loadInfo();
     connectWS();
   }
 

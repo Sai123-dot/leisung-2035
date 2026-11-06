@@ -10,10 +10,11 @@ from hisense_remote.server import create_app
 
 class ServerTestCase(unittest.IsolatedAsyncioTestCase):
     token = None
+    urls = None
 
     async def asyncSetUp(self):
         self.tv = FakeTV()
-        self.client = TestClient(TestServer(create_app(self.tv, token=self.token)))
+        self.client = TestClient(TestServer(create_app(self.tv, token=self.token, urls=self.urls)))
         await self.client.start_server()
 
     async def asyncTearDown(self):
@@ -29,6 +30,25 @@ class ApiTests(ServerTestCase):
         self.assertEqual(res.status, 200)
         res = await self.client.get("/static/app.css")
         self.assertEqual(res.status, 200)
+
+    async def test_pwa_assets(self):
+        res = await self.client.get("/manifest.webmanifest")
+        self.assertEqual(res.status, 200)
+        self.assertTrue(res.headers["Content-Type"].startswith("application/manifest+json"))
+        self.assertEqual((await res.json(content_type=None))["display"], "standalone")
+        res = await self.client.get("/sw.js")
+        self.assertEqual(res.status, 200)
+        self.assertIn("javascript", res.headers["Content-Type"])
+        for path in ("/static/icon.svg", "/static/icon-192.png", "/static/icon-512.png"):
+            res = await self.client.get(path)
+            self.assertEqual(res.status, 200, path)
+
+    async def test_info_without_urls(self):
+        info = await (await self.client.get("/api/info")).json()
+        self.assertIsNone(info["phone_url"])
+        self.assertFalse(info["token_required"])
+        res = await self.client.get("/api/qr.svg")
+        self.assertEqual(res.status, 404)
 
     async def test_state(self):
         res = await self.client.get("/api/state")
@@ -144,6 +164,24 @@ class ApiTests(ServerTestCase):
             msg = await asyncio.wait_for(ws.receive_json(), 2)
             self.assertEqual(msg["type"], "state")
             self.assertEqual(msg["state"]["current_app_name"], "Spotify")
+
+
+class PhoneUrlTests(ServerTestCase):
+    token = "t0k/en"
+    urls = ["http://localhost:8765/", "http://192.168.1.10:8765/"]
+
+    async def test_info_and_qr(self):
+        res = await self.client.get("/api/info", headers={"X-Auth-Token": self.token})
+        info = await res.json()
+        self.assertEqual(info["phone_url"], "http://192.168.1.10:8765/?token=t0k%2Fen")
+        self.assertTrue(info["token_required"])
+        self.assertEqual(info["urls"], self.urls)
+        res = await self.client.get("/api/qr.svg?token=t0k%2Fen")
+        self.assertEqual(res.status, 200)
+        self.assertTrue(res.headers["Content-Type"].startswith("image/svg+xml"))
+        self.assertTrue((await res.read()).startswith(b"<svg"))
+        res = await self.client.get("/api/qr.svg")
+        self.assertEqual(res.status, 401)
 
 
 class TokenTests(ServerTestCase):

@@ -7,7 +7,11 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TV Remote">
   <title>Hisense Remote</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="/static/icon.svg">
+  <link rel="apple-touch-icon" href="/static/icon-192.png">
   <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
@@ -176,6 +180,17 @@
 
     <div class="drawer-actions">
       <button class="key" id="btn-wake" title="Needs the TV's network standby / wake-on-LAN setting">Wake on LAN</button>
+    </div>
+
+    <h3>Use on your phone</h3>
+    <div class="phone-box">
+      <img class="qr hidden" id="qr-img" alt="QR code with this remote's address">
+      <p class="hint" id="phone-hint">Scan the code with the phone's camera (same Wi-Fi) to open the remote there.</p>
+      <div class="drawer-actions">
+        <button class="key accent hidden" id="btn-install">Install as an app</button>
+      </div>
+      <p class="hint hidden" id="ios-hint">On iPhone or iPad: tap the Share button in Safari, then "Add to Home Screen" to get an app icon.</p>
+      <p class="hint hidden" id="android-hint">In Chrome on Android: menu (&#8942;) &rsaquo; "Add to Home screen" gives you an app icon.</p>
     </div>
 
     <h3>Access token</h3>
